@@ -524,7 +524,7 @@ int main(int argc, char* argv[])
         if (tid >= n_comp_threads) {
           int n_elts = (C[0]*C[1])/n_comm_threads;
           MPI_Allreduce(MPI_IN_PLACE, (float*)delfil_libxsmm[0]+tid_comm*n_elts, n_elts, MPI_FLOAT, MPI_SUM, comms[tid_comm]);
-          libxsmm_dnn_optimizer_execute_st( libxsmm_opt[0], 0, tid );
+          libxsmm_dnn_optimizer_execute_st( libxsmm_opt[0], 0, tid_comm );
         }
         #pragma omp barrier
       }
@@ -607,7 +607,7 @@ int main(int argc, char* argv[])
         if (tid >= n_comp_threads) {
           int n_elts = (C[0]*C[1])/n_comm_threads;
           MPI_Allreduce(MPI_IN_PLACE, (float*)delfil_libxsmm[0]+tid_comm*n_elts, n_elts, MPI_FLOAT, MPI_SUM, comms[tid_comm]);
-          libxsmm_dnn_optimizer_execute_st( libxsmm_opt[0], 0, tid );
+          libxsmm_dnn_optimizer_execute_st( libxsmm_opt[0], 0, tid_comm );
         }
         #pragma omp barrier
       }
