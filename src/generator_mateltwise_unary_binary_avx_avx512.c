@@ -225,6 +225,7 @@ void adjust_in_microkernel_addr_gp_reg( libxsmm_generated_code*                 
   }
 }
 
+/*change this by D-*/
 LIBXSMM_API_INTERN
 void libxsmm_generator_configure_avx512_vlens(const libxsmm_meltw_descriptor* i_mateltwise_desc, libxsmm_mateltwise_kernel_config* i_micro_kernel_config) {
   /* First, determine the vlen compute based on the operation */
@@ -1547,7 +1548,21 @@ void libxsmm_setup_input_output_masks( libxsmm_generated_code*                 i
   use_m_output_masking  = (i_m % i_vlen_out == 0 ) ? 0 : 1;
 
   if (use_m_input_masking == 1) {
-    if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
+    if (io_generated_code->arch == LIBXSMM_X86_AVX512_VL256) {
+      libxsmm_datatype fake_dt;
+      if (i_vlen_in == 32) {
+        fake_dt = LIBXSMM_DATATYPE_I8;
+      } else if(i_vlen_in == 16) {
+        fake_dt = LIBXSMM_DATATYPE_BF16;
+      } else {
+        fake_dt = LIBXSMM_DATATYPE_F32;
+      }
+      mask_in_count = i_vlen_in - i_m % i_vlen_in;
+      mask_reg_in   = reserved_mask_regs;
+      /*change this D-*/
+      libxsmm_generator_mateltwise_initialize_avx512_mask(io_generated_code, i_tmp_reg, mask_reg_in, mask_in_count, fake_dt);
+      reserved_mask_regs++;
+    } else if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
       libxsmm_datatype fake_dt;
       if (i_vlen_in == 64) {
         fake_dt = LIBXSMM_DATATYPE_I8;
@@ -1570,7 +1585,21 @@ void libxsmm_setup_input_output_masks( libxsmm_generated_code*                 i
     if (i_vlen_in == i_vlen_out) {
       mask_reg_out = mask_reg_in;
     } else {
-      if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
+      if (io_generated_code->arch == LIBXSMM_X86_AVX512_VL256) {
+        libxsmm_datatype fake_dt;
+        if (i_vlen_out == 32) {
+          fake_dt = LIBXSMM_DATATYPE_I8;
+        } else if(i_vlen_out == 16) {
+          fake_dt = LIBXSMM_DATATYPE_BF16;
+        } else {
+          fake_dt = LIBXSMM_DATATYPE_F32;
+        }
+        mask_out_count = i_vlen_out - i_m % i_vlen_out;
+        mask_reg_out   = reserved_mask_regs;
+        /*change this D-*/
+        libxsmm_generator_mateltwise_initialize_avx512_mask(io_generated_code, i_tmp_reg, mask_reg_out, mask_out_count, fake_dt);
+        reserved_mask_regs++;
+      } else if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
         libxsmm_datatype fake_dt;
         if (i_vlen_out == 64) {
           fake_dt = LIBXSMM_DATATYPE_I8;

@@ -416,7 +416,7 @@ void libxsmm_generator_gelu_ps_minimax3_avx512( libxsmm_generated_code*         
     const unsigned int                             i_vec_c1,
     const unsigned int                             i_vec_c2 ) {
 
-  if (io_generated_code->arch >= LIBXSMM_X86_AVX512_CORE) {
+  if (io_generated_code->arch >= LIBXSMM_X86_AVX512_CORE) { //Change by D-
     libxsmm_x86_instruction_vec_compute_3reg_mask_sae_imm8( io_generated_code,
         LIBXSMM_X86_INSTR_VRANGEPS, 'z',
         i_vec_thres,

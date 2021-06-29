@@ -46,5 +46,5 @@ taskset -c 3 ./kernel ${TESTFILE2} 1 1 0 0 0 0 SP offsbr 5 1 1 1
 
 taskset -c 3 ./kernel ${TESTFILE2} 1 1 0 0 0 0 SP strdbr 5 1 1 1
 
-rm ${TESTFILE1}
-rm ${TESTFILE2}
+echo ${TESTFILE1}
+echo ${TESTFILE2}

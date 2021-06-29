@@ -312,7 +312,21 @@ void libxsmm_meqn_setup_input_output_masks( libxsmm_generated_code*             
   use_m_output_masking  = (i_m % i_vlen_out == 0 ) ? 0 : 1;
 
   if (use_m_input_masking == 1) {
-    if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
+    if (io_generated_code->arch == LIBXSMM_X86_AVX512_VL256) {
+      libxsmm_datatype fake_dt;
+      if (i_vlen_in == 32) {
+        fake_dt = LIBXSMM_DATATYPE_I8;
+      } else if(i_vlen_in == 16) {
+        fake_dt = LIBXSMM_DATATYPE_BF16;
+      } else {
+        fake_dt = LIBXSMM_DATATYPE_F32;
+      }
+      mask_in_count = i_vlen_in - i_m % i_vlen_in;
+      mask_reg_in   = reserved_mask_regs;
+      /* change this by D-*/
+      libxsmm_generator_mateltwise_initialize_avx512_mask(io_generated_code, i_tmp_reg, mask_reg_in, mask_in_count, fake_dt);
+      reserved_mask_regs++;
+    } else if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
       libxsmm_datatype fake_dt;
       if (i_vlen_in == 64) {
         fake_dt = LIBXSMM_DATATYPE_I8;
@@ -335,7 +349,21 @@ void libxsmm_meqn_setup_input_output_masks( libxsmm_generated_code*             
     if (i_vlen_in == i_vlen_out) {
       mask_reg_out = mask_reg_in;
     } else {
-      if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
+      if (io_generated_code->arch == LIBXSMM_X86_AVX512_VL256) {
+        libxsmm_datatype fake_dt;
+        if (i_vlen_out == 32) {
+          fake_dt = LIBXSMM_DATATYPE_I8;
+        } else if(i_vlen_out == 16) {
+          fake_dt = LIBXSMM_DATATYPE_BF16;
+        } else {
+          fake_dt = LIBXSMM_DATATYPE_F32;
+        }
+        mask_out_count = i_vlen_out - i_m % i_vlen_out;
+        mask_reg_out   = reserved_mask_regs;
+        /* change this by D-*/
+        libxsmm_generator_mateltwise_initialize_avx512_mask(io_generated_code, i_tmp_reg, mask_reg_out, mask_out_count, fake_dt);
+        reserved_mask_regs++;
+      } else if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
         libxsmm_datatype fake_dt;
         if (i_vlen_out == 64) {
           fake_dt = LIBXSMM_DATATYPE_I8;
@@ -1257,7 +1285,22 @@ void libxsmm_configure_reserved_zmms_and_masks(libxsmm_generated_code* io_genera
       i_micro_kernel_config->reduce_vreg = i_micro_kernel_config->reserved_zmms;
       i_micro_kernel_config->reserved_zmms += i_micro_kernel_config->reserved_zmms + 1;
       libxsmm_x86_instruction_vec_compute_3reg( io_generated_code, LIBXSMM_X86_INSTR_VPXORD, i_micro_kernel_config->vector_name, i_micro_kernel_config->reduce_vreg, i_micro_kernel_config->reduce_vreg, i_micro_kernel_config->reduce_vreg );
-      if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
+      if (io_generated_code->arch == LIBXSMM_X86_AVX512_VL256) {
+        libxsmm_datatype fake_dt;
+        /* Configure Reduce-to-scalar output_mask */
+        if (i_vlen_out == 32) {
+          fake_dt = LIBXSMM_DATATYPE_I8;
+        } else if(i_vlen_out == 16) {
+          fake_dt = LIBXSMM_DATATYPE_BF16;
+        } else {
+          fake_dt = LIBXSMM_DATATYPE_F32;
+        }
+        mask_out_count = i_vlen_out - 1;
+        i_micro_kernel_config->out_mask = i_micro_kernel_config->reserved_mask_regs;
+        /* change this by D- */
+        libxsmm_generator_mateltwise_initialize_avx512_mask(io_generated_code, i_gp_reg_mapping->temp_reg, i_micro_kernel_config->out_mask, mask_out_count, fake_dt);
+        i_micro_kernel_config->reserved_mask_regs += i_micro_kernel_config->reserved_mask_regs + 1;
+      } else if (io_generated_code->arch >= LIBXSMM_X86_AVX512) {
         libxsmm_datatype fake_dt;
         /* Configure Reduce-to-scalar output_mask */
         if (i_vlen_out == 64) {
