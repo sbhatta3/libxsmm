@@ -1344,7 +1344,7 @@ void libxsmm_generator_gemm_load_C( libxsmm_generated_code*             io_gener
                   LIBXSMM_X86_GP_REG_UNDEF, 0,
                   ((l_n * i_xgemm_desc->ldc) + (l_m * (i_micro_kernel_config->vector_length))) * (i_micro_kernel_config->datatype_size_out),
                   'x',
-                  0, 2, 1, 0 );
+                  0, 0, 1, 0 );
             }
           } else{
             if ( (i_micro_kernel_config->use_masking_a_c != 0) && ( l_m == (l_m_blocking - 1) ) ) {
