@@ -242,7 +242,7 @@ void libxsmm_generator_gemm_init_micro_kernel_config_fullvector( libxsmm_micro_k
         io_micro_kernel_config->vadd_instruction = LIBXSMM_X86_INSTR_VADDPS;
       }
     }
-  } else if ( i_arch <= LIBXSMM_X86_AVX512_VL256 ||  i_arch <= LIBXSMM_X86_AVX512_VL256_CLX  ||  i_arch <= LIBXSMM_X86_AVX512_VL256_CPX ) {
+  } else if ( i_arch <= LIBXSMM_X86_AVX512_VL256 ||  i_arch == LIBXSMM_X86_AVX512_VL256_CLX  ||  i_arch == LIBXSMM_X86_AVX512_VL256_CPX ) {
     io_micro_kernel_config->instruction_set = i_arch;
     io_micro_kernel_config->vector_reg_count = 32;
     io_micro_kernel_config->use_masking_a_c = i_use_masking_a_c;
