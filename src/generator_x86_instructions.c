@@ -2641,6 +2641,9 @@ void libxsmm_x86_instruction_vec_compute_mem( libxsmm_generated_code* io_generat
     case LIBXSMM_X86_INSTR_VPMOVZXBD:
     case LIBXSMM_X86_INSTR_VXORPS:
     case LIBXSMM_X86_INSTR_VMULPS:
+    /* by D-*/
+    case LIBXSMM_X86_INSTR_VPDPBUSD:
+    case LIBXSMM_X86_INSTR_VPDPBUSDS:
     case LIBXSMM_X86_INSTR_VDPBF16PS:
     case LIBXSMM_X86_INSTR_VCVTNE2PS2BF16:
     case LIBXSMM_X86_INSTR_VADDPS:
