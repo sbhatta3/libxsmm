@@ -33,6 +33,25 @@
   fprintf(stderr, "%s\n", libxsmm_dnn_get_error(chkerr_libxsmm_dnn_)); global_status = chkerr_libxsmm_dnn_; } \
 }
 
+#define SSC_TRACING 1
+
+// YOU MUST STILL PUSH/POP rBX around this code or corruption will occur!
+#ifndef SSC_TRACING
+
+#  define TRACING_SSC_MARK( a )
+
+#else
+
+// SSC marks used to create trace for simulator functional testing
+#define TRACING_SSC_MARK( MARK_ID )     \
+        __asm__ __volatile__ (          \
+        "\n\t  movl $"#MARK_ID", %%ebx" \
+        "\n\t  .byte 0x64, 0x67, 0x90"  \
+        : : : "%ebx" );
+
+#endif
+
+
 int main(int argc, char* argv[])
 {
   float *naive_input, *naive_output, *naive_output_save, *naive_filter, *naive_filter_wu, *naive_output_bp, *naive_output_wu, *naive_libxsmm_output;
@@ -534,7 +553,15 @@ int main(int argc, char* argv[])
         const int tid = 0;
 #endif
         for (i = 0; i < iters; ++i) {
+          // SSC_Mark begin
+          asm volatile ("push %rbx");
+          TRACING_SSC_MARK(10);
+          asm volatile ("pop %rbx");
           libxsmm_dnn_execute_st( libxsmm_handle, LIBXSMM_DNN_COMPUTE_KIND_FWD, 0, tid );
+          // SSC_Mark end
+          asm volatile ("push %rbx");
+          TRACING_SSC_MARK(100);
+          asm volatile ("pop %rbx");
         }
       }
       l_end = libxsmm_timer_tick();
