@@ -26,6 +26,7 @@
   fprintf(stderr, "%s\n", libxsmm_dnn_get_error(chkerr_libxsmm_dnn_)); global_status = chkerr_libxsmm_dnn_; } \
 }
 
+
 int main(int argc, char* argv[])
 {
 

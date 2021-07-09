@@ -11,22 +11,26 @@ TR=$(command -v tr)
 
 if [ "" = "${CHECK}" ] || [ "0" = "${CHECK}" ]; then
   if [ "" = "${CHECK_DNN_MB}" ]; then CHECK_DNN_MB=64; fi
-  if [ "" = "${CHECK_DNN_ITERS}" ]; then CHECK_DNN_ITERS=1000; fi
+  if [ "" = "${CHECK_DNN_ITERS}" ]; then CHECK_DNN_ITERS=10000; fi
 else # check
   if [ "" = "${CHECK_DNN_MB}" ]; then CHECK_DNN_MB=64; fi
   if [ "" = "${CHECK_DNN_ITERS}" ]; then CHECK_DNN_ITERS=1; fi
 fi
 
-if [ $# -ne 7 ]
+
+if [ $# -ne 9 ]
 then
   echo "Usage: $(basename $0) mb iters numa (1-mcdram/0-DDR) TYPE ('A'-ALL/'F'-FP/'B'-BP/'U'-WU) FORMAT ('A'-ALL/'L'-LIBXSMM/'T'-Tensorflow/'M'-Mixed) padding; using default values; using default values: 64 1000 1 f32 A L 1"
   MB=${CHECK_DNN_MB}
   ITERS=${CHECK_DNN_ITERS}
   NUMA=-1
-  BIN=f32
-  TYPE="A"
+  BIN=$4
+  #bf16
+  # BIN=f32
+  TYPE="F"
   FORMAT="L"
   PAD=1
+  ARCH=$8
 else
   MB=$1
   ITERS=$2
@@ -35,8 +39,12 @@ else
   TYPE=$5
   FORMAT=$6
   PAD=$7
+  ARCH=$8
+  OMP_NUM_THREADS=$9
 fi
-
+echo "$MB $ITERS $NUMA $BIN $TYPE $FORMAT $PAD $ARCH"
+export LIBXSMM_TARGET=$ARCH
+#export CHECK=0
 if [ "${GREP}" ] && [ "${SORT}" ] && [ "${CUT}" ] && [ "${TR}" ] && [ "${WC}" ]; then
   if [ "$(command -v lscpu)" ]; then
     NS=$(lscpu | ${GREP} -m1 "Socket(s)" | ${TR} -d " " | ${CUT} -d: -f2)
@@ -100,7 +108,8 @@ fi
 if [ "${BIN}" != "f32" ]; then
   true
 else
-${NUMACTL} ./layer_example_${BIN} ${ITERS}  224 224 ${MB}  3     64 7 7 3 3 2 ${TYPE} ${FORMAT} ${PAD}
+#${NUMACTL} ./layer_example_${BIN} 1000  224 224 64  3     64 7 7 3 3 2 F L 1
+${NUMACTL} ./layer_example_${BIN} ${ITERS}  224 224 ${MB}     3   64 7 7 3 3 2 ${TYPE} ${FORMAT} ${PAD}
 fi
 ${NUMACTL} ./layer_example_${BIN} ${ITERS}  56  56  ${MB}  64   256 1 1 0 0 1 ${TYPE} ${FORMAT} ${PAD}
 ${NUMACTL} ./layer_example_${BIN} ${ITERS}  56  56  ${MB}  64    64 1 1 0 0 1 ${TYPE} ${FORMAT} ${PAD}

@@ -25,6 +25,8 @@
 #define CHKERR_LIBXSMM_DNN(A) { const int chkerr_libxsmm_dnn_ = A; if (LIBXSMM_DNN_SUCCESS != chkerr_libxsmm_dnn_) { \
   fprintf(stderr, "%s\n", libxsmm_dnn_get_error(chkerr_libxsmm_dnn_)); global_status = chkerr_libxsmm_dnn_; } \
 }
+//by D-
+//#define LIBXSMM_INTRINSICS_AVX512
 
 int main(int argc, char* argv[])
 {
@@ -54,7 +56,7 @@ int main(int argc, char* argv[])
   int padh = 1;           /* padding in input, height */
   int padw = 1;           /* padding in input, width */
   int stride = 1;         /* stride when accessing inputs */
-  char type = 'A';        /* 'A': ALL, 'F': FP, 'B': BP, 'U', WU */
+  char type = 'A';        /* 'A': ALL, 'F': FP, 'B': BP, 'U': WU */
   char format = 'L';
 
   const char *const env_check = getenv("CHECK");
