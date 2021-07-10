@@ -27,6 +27,23 @@
 }
 //by D-
 //#define LIBXSMM_INTRINSICS_AVX512
+#define SSC_TRACING 1
+
+// YOU MUST STILL PUSH/POP rBX around this code or corruption will occur!
+#ifndef SSC_TRACING
+
+#  define TRACING_SSC_MARK( a )
+
+#else
+
+// SSC marks used to create trace for simulator functional testing
+#define TRACING_SSC_MARK( MARK_ID )     \
+        __asm__ __volatile__ (          \
+        "\n\t  movl $"#MARK_ID", %%ebx" \
+        "\n\t  .byte 0x64, 0x67, 0x90"  \
+        : : : "%ebx" );
+
+#endif
 
 int main(int argc, char* argv[])
 {
@@ -323,7 +340,7 @@ int main(int argc, char* argv[])
     printf("#   Performance - FWD (custom-Storage)   #\n");
     printf("##########################################\n");
     /* run LIBXSMM convolution for performance */
-    for (i = 0; i < 10; ++i) {
+    /*for (i = 0; i < 10; ++i) {
 #if defined(_OPENMP)
 #     pragma omp parallel
 #endif
@@ -335,9 +352,9 @@ int main(int argc, char* argv[])
 #endif
         libxsmm_dnn_execute_st( libxsmm_handle, LIBXSMM_DNN_COMPUTE_KIND_FWD, 0, tid );
       }
-    }
+    }*/
     l_start = libxsmm_timer_tick();
-    for (i = 0; i < iters; ++i) {
+    // for (i = 0; i < iters; ++i) {
 #if defined(_OPENMP)
 #     pragma omp parallel
 #endif
@@ -347,8 +364,19 @@ int main(int argc, char* argv[])
 #else
         const int tid = 0;
 #endif
-        libxsmm_dnn_execute_st( libxsmm_handle, LIBXSMM_DNN_COMPUTE_KIND_FWD, 0, tid );
-      }
+        for (i = 0; i < iters; ++i) {
+          // SSC_Mark begin
+          asm volatile ("push %rbx");
+          TRACING_SSC_MARK(1);
+          asm volatile ("pop %rbx");
+          libxsmm_dnn_execute_st( libxsmm_handle, LIBXSMM_DNN_COMPUTE_KIND_FWD, 0, tid );
+          // SSC_Mark end
+          asm volatile ("push %rbx");
+          TRACING_SSC_MARK(2);
+          asm volatile ("pop %rbx");
+        }      
+  //  	libxsmm_dnn_execute_st( libxsmm_handle, LIBXSMM_DNN_COMPUTE_KIND_FWD, 0, tid );
+      //}
     }
     l_end = libxsmm_timer_tick();
     l_total = libxsmm_timer_duration(l_start, l_end);
