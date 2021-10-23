@@ -36,9 +36,7 @@ typedef struct gemm_def {
   int br_unroll;
   int tc_config;
 } gemm_def;
-
 int g_reps = 0;
-
 LIBXSMM_INLINE void print_help(void) {
   printf("\n\n");
   printf("1. Usage (dense*dense=dense, correctness and performance):\n");

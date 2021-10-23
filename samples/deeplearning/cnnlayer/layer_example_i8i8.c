@@ -411,9 +411,7 @@ int main(int argc, char* argv[])
           asm volatile ("push %rbx");
           TRACING_SSC_MARK(2);
           asm volatile ("pop %rbx");
-        }     
-       // libxsmm_dnn_execute_st( libxsmm_handle, LIBXSMM_DNN_COMPUTE_KIND_FWD, 0, tid );
-      //}
+      }
     }
     l_end = libxsmm_timer_tick();
     l_total = libxsmm_timer_duration(l_start, l_end);

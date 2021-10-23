@@ -256,12 +256,13 @@ void unary_op_bf16_f32_gold(libxsmm_blasint M, libxsmm_blasint N, libxsmm_blasin
 
 int test_unary_op_f32_f32( libxsmm_blasint M, libxsmm_blasint N, libxsmm_blasint ldi, libxsmm_blasint ldo, unsigned int op, unsigned int use_bcast) {
   float *in, *in_vector, *_in;
-  float *out, *out_gold;
+  float  *out_gold,*out;
   libxsmm_blasint i, j;
   libxsmm_blasint s;
   int ret = EXIT_SUCCESS;
   libxsmm_meltw_unary_param unary_param;
   libxsmm_meltw_unary_flags unary_flags;
+  libxsmm_matdiff_info norms_out;
   libxsmm_meltw_unary_type  unary_type;
   char opname[256];
 
@@ -282,6 +283,7 @@ int test_unary_op_f32_f32( libxsmm_blasint M, libxsmm_blasint N, libxsmm_blasint
   in        = (float*) libxsmm_aligned_malloc( sizeof(float)*N*ldi,   64);
   out       = (float*) libxsmm_aligned_malloc( sizeof(float)*N*ldo,   64);
   out_gold  = (float*) libxsmm_aligned_malloc( sizeof(float)*N*ldo,   64);
+  // out       = (unsigned int*) libxsmm_aligned_malloc( sizeof(unsigned int)*N*ldo,   64);
   _in       = in;
   in_vector = NULL;
 
@@ -371,11 +373,25 @@ int test_unary_op_f32_f32( libxsmm_blasint M, libxsmm_blasint N, libxsmm_blasint
   unary_kernel( &unary_param );
 
   /* compare result */
+  libxsmm_matdiff_clear(&norms_out);
+  printf("##########################################\n");
+  printf("#   Correctness  - Output                #\n");
+  printf("##########################################\n");
+  libxsmm_matdiff(&norms_out, LIBXSMM_DATATYPE_F32, ldo*N, 1, out_gold, out, 0, 0);
+  printf("L1 reference  : %.25g\n", norms_out.l1_ref);
+  printf("L1 test       : %.25g\n", norms_out.l1_tst);
+  printf("L2 abs.error  : %.24f\n", norms_out.l2_abs);
+  printf("L2 rel.error  : %.24f\n", norms_out.l2_rel);
+  printf("Linf abs.error: %.24f\n", norms_out.linf_abs);
+  printf("Linf rel.error: %.24f\n", norms_out.linf_rel);
+  printf("Check-norm    : %.24f\n\n", norms_out.normf_rel);
+
+  /* compare result */
   s = 0;
   for ( i = 0; i < N; ++i ) {
     for ( j = 0; j < M; ++j ) {
       if ( unequal_fp32_vals(out_gold[(i*ldo)+j], out[(i*ldo)+j])  ) {
-        printf("error at possition i=%i, j=%i, %f, %f\n", i, j, out[(i*ldo)+j], out_gold[(i*ldo)+j]);
+        printf("error at possition i=%i, j=%i, %0f, %f\n", i, j, out[(i*ldo)+j], out_gold[(i*ldo)+j]);
         s = 1;
       }
 #if 0
@@ -392,6 +408,18 @@ int test_unary_op_f32_f32( libxsmm_blasint M, libxsmm_blasint N, libxsmm_blasint
     ret = EXIT_FAILURE;
   }
 
+
+double error_bound =0.0;
+if(RCP_OP || RCP_SQRT_OP){
+  error_bound = 0.0027;
+}else{
+  error_bound = 0.0007;
+}
+
+if ( norms_out.normf_rel > error_bound ) {
+  ret = EXIT_FAILURE;
+}
+
   libxsmm_free( out_gold );
   libxsmm_free( out );
   libxsmm_free( in );
@@ -401,6 +429,8 @@ int test_unary_op_f32_f32( libxsmm_blasint M, libxsmm_blasint N, libxsmm_blasint
 
   return ret;
 }
+
+
 
 int test_unary_op_bf16_bf16( libxsmm_blasint M, libxsmm_blasint N, libxsmm_blasint ldi, libxsmm_blasint ldo, unsigned int op, unsigned int use_bcast ) {
   libxsmm_bfloat16 *in, *in_vector, *_in;

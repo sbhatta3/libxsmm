@@ -342,6 +342,7 @@ void libxsmm_generator_gelu_ps_minimax3_avx( libxsmm_generated_code*            
                                        LIBXSMM_X86_INSTR_VFMADD213PS,
                                        'y',
                                        i_vec_shifter, i_vec_scale, i_vec_index );
+    libxsmm_x86_instruction_vec_compute_2reg( io_generated_code, LIBXSMM_X86_INSTR_VMOVDQU64, 'z', i_vec_index, i_vec_x );
 
 
    libxsmm_x86_instruction_vpermd_16way_avx2( io_generated_code,
@@ -391,10 +392,10 @@ void libxsmm_generator_gelu_ps_minimax3_avx( libxsmm_generated_code*            
                                        'y',
                                        i_vec_half, i_vec_xr, i_vec_C2 );
 
-   libxsmm_x86_instruction_vec_compute_3reg( io_generated_code,
-                                       LIBXSMM_X86_INSTR_VMULPS,
-                                       'y',
-                                       i_vec_x, i_vec_C2, i_vec_x );
+  //  libxsmm_x86_instruction_vec_compute_3reg( io_generated_code,
+  //                                      LIBXSMM_X86_INSTR_VMULPS,
+  //                                      'y',
+  //                                      i_vec_x, i_vec_C2, i_vec_x );
 }
 
 
@@ -442,7 +443,6 @@ void libxsmm_generator_gelu_ps_minimax3_avx512( libxsmm_generated_code*         
                                        LIBXSMM_X86_INSTR_VMOVDQU64,
                                        'z',
                                        i_vec_xa, i_vec_index );
-
   libxsmm_x86_instruction_vec_compute_3reg( io_generated_code,
                                        LIBXSMM_X86_INSTR_VFMADD213PS,
                                        'z',
@@ -473,6 +473,7 @@ void libxsmm_generator_gelu_ps_minimax3_avx512( libxsmm_generated_code*         
                                        LIBXSMM_X86_INSTR_VFMADD213PS,
                                        'z',
                                        i_vec_C1, i_vec_xa, i_vec_C2 );
+
 
    libxsmm_x86_instruction_vec_compute_3reg( io_generated_code,
                                        LIBXSMM_X86_INSTR_VFMADD213PS,
@@ -575,11 +576,15 @@ void libxsmm_generator_gelu_inv_ps_minimax3_avx512( libxsmm_generated_code*     
                                        LIBXSMM_X86_INSTR_VFMADD213PS,
                                        'z',
                                        i_vec_half, i_vec_xr, i_vec_C2 );
-
    libxsmm_x86_instruction_vec_compute_2reg( io_generated_code,
                                        LIBXSMM_X86_INSTR_VMOVDQU64,
                                        'z',
                                        i_vec_C2, i_vec_x );
+
+  //  libxsmm_x86_instruction_vec_compute_2reg( io_generated_code,
+  //                                      LIBXSMM_X86_INSTR_VMOVDQU64,
+  //                                      'z',
+  //                                      i_vec_C2, i_vec_x );
 }
 
 LIBXSMM_API_INTERN

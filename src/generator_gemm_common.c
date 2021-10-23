@@ -1838,12 +1838,18 @@ void libxsmm_generator_gemm_store_C( libxsmm_generated_code*             io_gene
         }
       }
     }
-  } else if ( ( (i_micro_kernel_config->instruction_set <= LIBXSMM_X86_ALLFEAT) || (i_micro_kernel_config->instruction_set >= LIBXSMM_X86_AVX512_VL256) ) &&
+    /*change by D- || was changed by  && */
+  } else if ( ( (i_micro_kernel_config->instruction_set <= LIBXSMM_X86_ALLFEAT) && (i_micro_kernel_config->instruction_set >= LIBXSMM_X86_AVX512_VL256) ) &&
               ( (LIBXSMM_GEMM_PRECISION_I8 == LIBXSMM_GETENUM_INP( i_xgemm_desc->datatype ) ) && (LIBXSMM_GEMM_PRECISION_I8 == LIBXSMM_GETENUM_OUT( i_xgemm_desc->datatype ) ) ) ) {
     /* pick the right instrucitons */
     unsigned int inst_f32_i32 = ( ( i_xgemm_desc->flags & LIBXSMM_GEMM_FLAG_C_UNSIGNED ) != 0 ) ? LIBXSMM_X86_INSTR_VCVTPS2UDQ : LIBXSMM_X86_INSTR_VCVTPS2DQ;
     unsigned int inst_i32_i8  = ( ( i_xgemm_desc->flags & LIBXSMM_GEMM_FLAG_C_UNSIGNED ) != 0 ) ? LIBXSMM_X86_INSTR_VPMOVUSDB  : LIBXSMM_X86_INSTR_VPMOVSDB;
+/*
+    if (i_micro_kernel_config->instruction_set <= LIBXSMM_X86_AVX2){
+      inst_f32_i32 = LIBXSMM_X86_INSTR_VCVTPS2DQ;
+      inst_i32_i8 = LIBXSMM_X86_INSTR_VPMOVSDB;
 
+    }*/
     /* there are case where we need to load the scaling factor's address from the stack argument list */
     if ( (i_xgemm_desc->flags & LIBXSMM_GEMM_FLAG_BATCH_REDUCE_OFFSET) != 0 ) {
       libxsmm_x86_instruction_load_arg_to_reg( io_generated_code, 0, i_gp_reg_mapping->gp_reg_scf );
